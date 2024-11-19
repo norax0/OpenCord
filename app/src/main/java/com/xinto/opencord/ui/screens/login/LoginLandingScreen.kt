@@ -55,6 +55,12 @@ fun LoginLandingScreen(
                 ) {
                     Text(stringResource(R.string.login_action_login))
                 }
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = onLoginClick,
+                ) {
+                    Text("Login (with token)" )
+                }
                 FilledTonalButton(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = onRegisterClick,

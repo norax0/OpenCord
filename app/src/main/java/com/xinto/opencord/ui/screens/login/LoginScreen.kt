@@ -8,6 +8,10 @@ import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +32,9 @@ fun LoginScreen(
     viewModel: LoginViewModel = getViewModel(),
 ) {
     val context = LocalContext.current
+    var usernameError by rememberSaveable { mutableStateOf(false) }
+    var passwordError by rememberSaveable { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -84,8 +91,19 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     value = viewModel.username,
                     label = { Text(stringResource(R.string.login_field_username)) },
-                    onValueChange = viewModel::updateUsername,
-                    isError = viewModel.usernameError,
+                    onValueChange = { 
+                        viewModel.updateUsername(it)
+                        usernameError = it.isBlank()
+                    },
+                    isError = usernameError,
+                    supportingText = {
+                        if (usernameError) {
+                            Text(
+                                text = stringResource(R.string.login_error_username_empty),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.None,
@@ -96,8 +114,19 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     value = viewModel.password,
                     label = { Text(stringResource(R.string.login_field_password)) },
-                    onValueChange = viewModel::updatePassword,
-                    isError = viewModel.passwordError,
+                    onValueChange = { 
+                        viewModel.updatePassword(it)
+                        passwordError = it.isBlank()
+                    },
+                    isError = passwordError,
+                    supportingText = {
+                        if (passwordError) {
+                            Text(
+                                text = stringResource(R.string.login_error_password_empty),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(
@@ -108,7 +137,14 @@ fun LoginScreen(
             Spacer(Modifier.weight(1f))
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { viewModel.login(null) },
+                onClick = { 
+                    usernameError = viewModel.username.isBlank()
+                    passwordError = viewModel.password.isBlank()
+                    
+                    if (!usernameError && !passwordError) {
+                        viewModel.login(null)
+                    }
+                },
                 enabled = !viewModel.isLoading,
             ) {
                 Text(stringResource(R.string.login_action_login))
